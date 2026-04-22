@@ -600,7 +600,11 @@ function PrintView({ entry, onBack }) {
     if (!contentRef.current) return;
     setExporting(true);
     try {
-      const canvas = await html2canvas(contentRef.current, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+      const el = contentRef.current;
+      const prevWidth = el.style.width;
+      el.style.width = "780px";
+      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff", windowWidth: 780 });
+      el.style.width = prevWidth;
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "letter");
       const pdfW = pdf.internal.pageSize.getWidth();
