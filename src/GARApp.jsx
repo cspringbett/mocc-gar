@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 // ---------------------------------------------------------------------------
 // Storage — localStorage
@@ -37,7 +37,12 @@ const CATEGORIES = [
 
 const PRESETS = {
   project: ["OctoStalking", "Sandy Suckers"],
-  operation: ["Individual Tracking", "VIE Tagging"],
+  operation: ["Individual Tracking", "VIE Tagging", "Burrow Behavior", "Core Practice", "Core Sampling"],
+  participants: [
+    "Cheyne Springbett", "Colleen Hecker", "Miranda Manross", "Brian Bennett",
+    "Chelsea Benice", "Natasha Ahrweiler", "Breckin Foran", "Olivia Schuitema",
+    "Genevieve Sylvester", "Macy Sherman", "Jordan Waldron", "Jeanette Wyneken",
+  ],
   location: ["Blue Heron Bridge", "Jupiter Lighthouse Park", "Ocean Inlet Park", "Peanut Island", "Kaito Bridge"],
 };
 
@@ -150,6 +155,111 @@ function SelectOrText({ field, label, placeholder, value, onChange }) {
 }
 
 // ---------------------------------------------------------------------------
+// ParticipantSelect
+// ---------------------------------------------------------------------------
+function ParticipantSelect({ value, onChange }) {
+  const presetNames = PRESETS.participants;
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  const selected = value ? value.split(", ").filter(Boolean) : [];
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setOpen(false);
+        setQuery("");
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const filtered = presetNames.filter(
+    n => !selected.includes(n) && n.toLowerCase().includes(query.toLowerCase())
+  );
+  const showAddOther = query.trim() &&
+    !presetNames.some(n => n.toLowerCase() === query.trim().toLowerCase()) &&
+    !selected.includes(query.trim());
+
+  const add = (name) => {
+    onChange([...selected, name].join(", "));
+    setQuery("");
+  };
+
+  const remove = (name) => {
+    onChange(selected.filter(n => n !== name).join(", "));
+  };
+
+  return (
+    <div style={{ gridColumn: "1 / -1" }} ref={containerRef}>
+      <label style={labelSty}>Participants</label>
+      {selected.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 6 }}>
+          {selected.map(name => (
+            <span key={name} style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              fontSize: 12, padding: "2px 6px 2px 10px",
+              background: "var(--color-background-secondary)",
+              border: "0.5px solid var(--color-border-secondary)",
+              borderRadius: 20, color: "var(--color-text-primary)",
+            }}>
+              {name}
+              <button onMouseDown={e => { e.preventDefault(); remove(name); }} style={{
+                background: "none", border: "none", cursor: "pointer",
+                padding: "0 2px", lineHeight: 1,
+                color: "var(--color-text-secondary)", fontSize: 15,
+              }}>×</button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div style={{ position: "relative" }}>
+        <input
+          style={inputSty}
+          type="text"
+          placeholder={selected.length ? "Add more…" : "Search participants…"}
+          value={query}
+          onChange={e => { setQuery(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+        />
+        {open && (filtered.length > 0 || showAddOther) && (
+          <div style={{
+            position: "absolute", top: "calc(100% + 2px)", left: 0, right: 0, zIndex: 100,
+            background: "var(--color-background-primary)",
+            border: "0.5px solid var(--color-border-secondary)",
+            borderRadius: 8, boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            maxHeight: 200, overflowY: "auto",
+          }}>
+            {filtered.map((name, i) => (
+              <div key={name}
+                onMouseDown={e => { e.preventDefault(); add(name); }}
+                style={{
+                  padding: "8px 12px", fontSize: 13, cursor: "pointer",
+                  color: "var(--color-text-primary)",
+                  borderBottom: (i < filtered.length - 1 || showAddOther) ? "0.5px solid var(--color-border-tertiary)" : "none",
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = "var(--color-background-secondary)"}
+                onMouseLeave={e => e.currentTarget.style.background = ""}
+              >{name}</div>
+            ))}
+            {showAddOther && (
+              <div
+                onMouseDown={e => { e.preventDefault(); add(query.trim()); }}
+                style={{ padding: "8px 12px", fontSize: 13, cursor: "pointer", color: "var(--color-text-secondary)", fontStyle: "italic" }}
+                onMouseEnter={e => e.currentTarget.style.background = "var(--color-background-secondary)"}
+                onMouseLeave={e => e.currentTarget.style.background = ""}
+              >Add "{query.trim()}"</div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // NewTab
 // ---------------------------------------------------------------------------
 function NewTab({ onSaved }) {
@@ -189,10 +299,7 @@ function NewTab({ onSaved }) {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <SelectOrText field="project" label="Project" placeholder="e.g. Octopus spatial ecology" value={meta.project} onChange={v => setMeta(p => ({...p, project: v}))} />
           <SelectOrText field="operation" label="Operation" placeholder="e.g. VIE tagging survey" value={meta.operation} onChange={v => setMeta(p => ({...p, operation: v}))} />
-          <div>
-            <label style={labelSty}>Participants</label>
-            <input style={inputSty} type="text" placeholder="e.g. Cheyne, Brooks" value={meta.participants} onChange={e => setMeta(p => ({...p, participants: e.target.value}))} />
-          </div>
+          <ParticipantSelect value={meta.participants} onChange={v => setMeta(p => ({...p, participants: v}))} />
           <SelectOrText field="location" label="Location" placeholder="e.g. Blue Heron Bridge" value={meta.location} onChange={v => setMeta(p => ({...p, location: v}))} />
         </div>
       </div>
