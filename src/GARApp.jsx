@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 // ---------------------------------------------------------------------------
 // Storage — localStorage
@@ -584,6 +586,8 @@ function CSVView({ entries, onBack }) {
 // ---------------------------------------------------------------------------
 function PrintView({ entry, onBack }) {
   const rating = getRating(entry.total);
+  const contentRef = useRef(null);
+  const [exporting, setExporting] = useState(false);
   const metaFields = [
     ["Project", entry.project],
     ["Operation", entry.operation],
@@ -592,13 +596,44 @@ function PrintView({ entry, onBack }) {
     ["Date/Time", new Date(entry.ts).toLocaleString()],
   ].filter(([, v]) => v);
 
+  const handleDownloadPDF = async () => {
+    if (!contentRef.current) return;
+    setExporting(true);
+    try {
+      const canvas = await html2canvas(contentRef.current, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "letter");
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = pdf.internal.pageSize.getHeight();
+      const imgH = (canvas.height * pdfW) / canvas.width;
+      let y = 0;
+      pdf.addImage(imgData, "PNG", 0, y, pdfW, imgH);
+      let remaining = imgH - pdfH;
+      while (remaining > 0) {
+        y -= pdfH;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, y, pdfW, imgH);
+        remaining -= pdfH;
+      }
+      const filename = `GAR_${entry.project || "assessment"}_${new Date(entry.ts).toLocaleDateString().replace(/\//g, "-")}.pdf`;
+      pdf.save(filename);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color: "#111", background: "white", minHeight: "100vh", padding: "1.5rem 1.25rem" }}>
-      {/* Back button - hidden on print */}
-      <div className="no-print" style={{ marginBottom: "1.25rem" }}>
+      {/* Toolbar - hidden on print */}
+      <div className="no-print" style={{ marginBottom: "1.25rem", display: "flex", alignItems: "center", gap: 10 }}>
         <button onClick={onBack} style={{ ...btnOutline, fontSize: 12, color: "#111", borderColor: "#333" }}>‹ Back</button>
-        <span style={{ fontSize: 11, color: "#333", marginLeft: 10 }}>Use browser Share → Print to save as PDF</span>
+        <button onClick={handleDownloadPDF} disabled={exporting} style={{ ...btnPrimary, fontSize: 12 }}>
+          {exporting ? "Generating…" : "Download PDF"}
+        </button>
       </div>
+
+      {/* PDF capture area */}
+      <div ref={contentRef} style={{ padding: "24px 28px" }}>
 
       {/* Header */}
       <div style={{ borderBottom: "2px solid #111", paddingBottom: 10, marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
@@ -681,6 +716,8 @@ function PrintView({ entry, onBack }) {
           <div style={{ fontSize: 12, color: "#333", lineHeight: 1.5 }}>{entry.notes}</div>
         </div>
       )}
+
+      </div>{/* end PDF capture area */}
     </div>
   );
 }
