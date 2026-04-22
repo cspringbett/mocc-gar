@@ -596,24 +596,24 @@ function PrintView({ entry, onBack }) {
     <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color: "#111", background: "white", minHeight: "100vh", padding: "1.5rem 1.25rem" }}>
       {/* Back button - hidden on print */}
       <div className="no-print" style={{ marginBottom: "1.25rem" }}>
-        <button onClick={onBack} style={{ ...btnOutline, fontSize: 12 }}>‹ Back</button>
-        <span style={{ fontSize: 11, color: "#888", marginLeft: 10 }}>Use browser Share → Print to save as PDF</span>
+        <button onClick={onBack} style={{ ...btnOutline, fontSize: 12, color: "#111", borderColor: "#333" }}>‹ Back</button>
+        <span style={{ fontSize: 11, color: "#333", marginLeft: 10 }}>Use browser Share → Print to save as PDF</span>
       </div>
 
       {/* Header */}
       <div style={{ borderBottom: "2px solid #111", paddingBottom: 10, marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
         <div>
           <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.02em" }}>MOCC GAR Worksheet</div>
-          <div style={{ fontSize: 11, color: "#666", marginTop: 2 }}>Generalized Assessment of Risk — Scientific Diving</div>
+          <div style={{ fontSize: 11, color: "#333", marginTop: 2 }}>Generalized Assessment of Risk — Scientific Diving</div>
         </div>
-        <div style={{ textAlign: "right", fontSize: 10, color: "#888" }}>{new Date(entry.ts).toLocaleString()}</div>
+        <div style={{ textAlign: "right", fontSize: 10, color: "#333" }}>{new Date(entry.ts).toLocaleString()}</div>
       </div>
 
       {/* Meta */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px 16px", marginBottom: 16, padding: "10px 12px", background: "#f7f7f7", borderRadius: 6 }}>
         {metaFields.map(([k, v]) => (
           <div key={k} style={{ marginBottom: 2 }}>
-            <div style={{ fontSize: 10, color: "#888", textTransform: "uppercase", letterSpacing: "0.04em" }}>{k}</div>
+            <div style={{ fontSize: 10, color: "#444", textTransform: "uppercase", letterSpacing: "0.04em" }}>{k}</div>
             <div style={{ fontSize: 12, color: "#111", fontWeight: 500 }}>{v}</div>
           </div>
         ))}
@@ -624,7 +624,7 @@ function PrintView({ entry, onBack }) {
         <div style={{ padding: "4px 10px", borderRadius: 4, background: "#E1F5EE", color: "#085041" }}><strong>Green</strong> ≤32</div>
         <div style={{ padding: "4px 10px", borderRadius: 4, background: "#FAEEDA", color: "#633806" }}><strong>Amber</strong> 33–56</div>
         <div style={{ padding: "4px 10px", borderRadius: 4, background: "#FCEBEB", color: "#501313" }}><strong>Red</strong> &gt;56</div>
-        <div style={{ marginLeft: "auto", fontSize: 9, color: "#888", alignSelf: "center" }}>0 = no risk · 10 = highest risk</div>
+        <div style={{ marginLeft: "auto", fontSize: 9, color: "#444", alignSelf: "center" }}>0 = no risk · 10 = highest risk</div>
       </div>
 
       {/* Scores */}
@@ -645,13 +645,13 @@ function PrintView({ entry, onBack }) {
               <tr key={cat.key} style={{ borderBottom: "1px solid #eee" }}>
                 <td style={{ padding: "7px 8px", fontSize: 11, color: "#222", verticalAlign: "top" }}>
                   <strong>{cat.label}</strong>
-                  <div style={{ fontSize: 9.5, color: "#888", marginTop: 2 }}>{cat.desc}</div>
+                  <div style={{ fontSize: 9.5, color: "#444", marginTop: 2 }}>{cat.desc}</div>
                 </td>
                 <td style={{ padding: "7px 8px", textAlign: "right", fontSize: 13, fontWeight: 700, color: sc, verticalAlign: "middle" }}>{score}</td>
               </tr>,
               cat.individual && (
                 <tr key={cat.key + "_indiv"} style={{ background: "#fafafa", borderBottom: "1px solid #eee" }}>
-                  <td style={{ padding: "4px 8px 4px 24px", fontSize: 10, color: "#888" }}>
+                  <td style={{ padding: "4px 8px 4px 24px", fontSize: 10, color: "#444" }}>
                     {cat.label} — Individual <span style={{ fontSize: 9 }}>(not counted in total)</span>
                   </td>
                   <td style={{ padding: "4px 8px", textAlign: "right", fontSize: 10, color: ic, fontWeight: 600 }}>{indiv}</td>
@@ -665,8 +665,8 @@ function PrintView({ entry, onBack }) {
       {/* Total + Rating */}
       <div style={{ display: "flex", gap: 12, marginBottom: 14, alignItems: "stretch" }}>
         <div style={{ padding: "10px 18px", background: "#f0f0f0", borderRadius: 6, textAlign: "center", minWidth: 90 }}>
-          <div style={{ fontSize: 10, color: "#666", marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.05em" }}>Total</div>
-          <div style={{ fontSize: 28, fontWeight: 700, color: "#111", lineHeight: 1 }}>{entry.total}<span style={{ fontSize: 13, fontWeight: 400, color: "#888" }}>/80</span></div>
+          <div style={{ fontSize: 10, color: "#333", marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.05em" }}>Total</div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: "#111", lineHeight: 1 }}>{entry.total}<span style={{ fontSize: 13, fontWeight: 400, color: "#444" }}>/80</span></div>
         </div>
         <div style={{ flex: 1, padding: "10px 14px", borderRadius: 6, background: rating.bg, border: `1.5px solid ${rating.color}` }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: rating.color, marginBottom: 3 }}>{rating.label}</div>
@@ -677,7 +677,7 @@ function PrintView({ entry, onBack }) {
       {/* Notes */}
       {entry.notes && (
         <div style={{ padding: "10px 12px", background: "#f7f7f7", borderRadius: 6, borderLeft: "3px solid #ccc" }}>
-          <div style={{ fontSize: 10, color: "#888", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Notes</div>
+          <div style={{ fontSize: 10, color: "#444", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Notes</div>
           <div style={{ fontSize: 12, color: "#333", lineHeight: 1.5 }}>{entry.notes}</div>
         </div>
       )}
